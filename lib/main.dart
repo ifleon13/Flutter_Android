@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
         '/productos': (BuildContext context) => ProductosPage(title: 'Mis Productos'),
         '/ventas': (BuildContext context) => VentasPage(title: 'Mis Ventas'),
       },
-
     );
   }
 }
