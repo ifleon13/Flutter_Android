@@ -3,12 +3,18 @@ import 'package:flutter_android/productos/ProductosPage.dart';
 import 'package:flutter_android/ventas/VentasPage.dart';
 import 'package:flutter_android/activityresult/SelectionPage.dart';
 import 'dart:async' show Future;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_android/models/Movie.dart';
+import 'package:flutter_android/services/MovieService.dart';
+
 
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,7 +22,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      //home: MyHomePage(),
+      home:  ContactsPage(),
       routes: <String, WidgetBuilder> {
         '/productos': (BuildContext context) => ProductosPage(title: 'Mis Productos'),
         '/ventas': (BuildContext context) => VentasPage(title: 'Mis Ventas'),
@@ -25,127 +32,120 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
 
+class ContactsPage extends StatefulWidget  {
+
+  ContactsPage({Key key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageContactsState createState() => _MyHomePageContactsState();
+
 }
 
-class _MyHomePageState extends State<MyHomePage> {
 
-  String _selection;
+class _MyHomePageContactsState extends State<ContactsPage> {
+
+  List<Movie> listMovies;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
-    Widget buttonWidget = new FlatButton(
-      textColor: Colors.blueGrey,
-      color: Colors.white,
-      child: new Text('To Selection Screen'),
-      onPressed: null,
-    );
-
-
-    Widget buttonWidgetRaised = new RaisedButton(onPressed:(){
-      irAProductos(context);
-    } ,
-      child: new Text("Productos"),
-    );
-
-
-    Widget buttonWidgetActivityResult = new RaisedButton(onPressed:(){
-      _buttonTapped(context);
-    } ,
-      child: new Text("Test ActivityResult"),
-    );
-
-
-    List<Widget> widgets = new List<Widget>();
-    widgets.add(buttonWidget);
-    widgets.add(buttonWidgetRaised);
-    widgets.add(buttonWidgetActivityResult);
-
-    if (_selection != null) {
-      Widget textWidget = new Text(_selection);
-      widgets.add(textWidget);
-    }
-
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Home"),
-      ),
-      body: Center(
-
-        child: Column(
-          children: widgets,
-       /*   children: <Widget>[
-
-            new RaisedButton(onPressed:(){
-              irAProductos(context);
-            } ,
-              child: new Text("Productos"),
-            ),
-
-            new RaisedButton(onPressed:(){
-              irAVentas(context);
-            } ,
-              child: new Text("Ventas"),
-            ),
-            new RaisedButton(onPressed:(){
-
-            } ,
-              child: new Text("Activity Result"),
-            ),
-          ], */
+        appBar: AppBar(
+          title: new Text("Contacts"),
         ),
-      ) // This trailing comma makes auto-formatting nicer for build methods.
+        body: _listado()
     );
   }
 
 
 
-  void _buttonTapped(BuildContext context) async {
-    Map results = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SelectionPage()),
+  Widget _listado(){
+
+    return FutureBuilder(
+
+        future: this._fetchData(),
+        builder: (context, snapshot){
+
+          if(snapshot.connectionState == ConnectionState.done){
+
+            return ListView.builder(
+                itemCount: listMovies.length,
+                itemBuilder: (BuildContext context, int position) {
+                  return getRow(position);
+                });
+          }
+          else {
+            return Center(child: CircularProgressIndicator());
+          }
+        }
     );
+  }
 
 
-    if (results != null && results.containsKey('selection')) {
-      setState(() {
-        _selection = results['selection'];
+
+
+
+    Widget getRow(int index) {
+
+      return ListTile(
+          leading: CircleAvatar(
+              child: Text("${listMovies[index].getTitle[0].toUpperCase()}")
+          ),
+          title: Text("${listMovies[index].getTitle}"),
+          subtitle: Text("${listMovies[index].getTitle}"),
+          onTap: () => _onTapItem(context, listMovies[index]),
+      );
+    }
+
+
+  void _onTapItem(BuildContext context, Movie movie) {
+    _showDialog(movie.getTitle, movie.getBody);
+  }
+
+
+    _fetchData() async {
+    await loadMovies().then((dynamic res) {
+        listMovies = res;
       });
     }
+
+
+
+  void _showDialog(String title, String msn) {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(title),
+          content: new Text(msn),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Cancelar"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("Aceptar"),
+              textColor: Colors.pink,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
-
 }
-
-
-
-
-void irAProductos(BuildContext context){
-  print("Button productos"); //1
-  Navigator.of(context).pushNamed('/productos'); //2
-}
-
-
-void irAVentas(BuildContext context){
-  print("Button ventas"); //1
-  Navigator.of(context).pushNamed('/ventas'); //2
-}
-
-
-/*
-void _buttonTapped(BuildContext context)  {
-  Navigator.of(context).push(new MaterialPageRoute<dynamic>(
-    builder: (BuildContext context) {
-      return new SelectionPage();
-    },
-  ));
-}*/
-
-
-
-
