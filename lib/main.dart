@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_android/productos/ProductosPage.dart';
-import 'package:flutter_android/ventas/VentasPage.dart';
-import 'package:flutter_android/activityresult/SelectionPage.dart';
-import 'dart:async' show Future;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:flutter_android/models/Movie.dart';
 import 'package:flutter_android/services/MovieService.dart';
 
@@ -22,12 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      //home: MyHomePage(),
       home:  ContactsPage(),
-      routes: <String, WidgetBuilder> {
-        '/productos': (BuildContext context) => ProductosPage(title: 'Mis Productos'),
-        '/ventas': (BuildContext context) => VentasPage(title: 'Mis Ventas'),
-      },
     );
   }
 }
